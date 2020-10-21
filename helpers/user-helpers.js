@@ -1,6 +1,9 @@
 var db=require('../confg/connection')
 var collection=require('../confg/collections')
 const bcrypt=require('bcrypt')  
+const { ObjectID } = require('mongodb')
+const { response } = require('express')
+var objectId=require('mongodb').ObjectID
 
 module.exports={
     doSignup:(userData)=>{
@@ -36,6 +39,57 @@ module.exports={
                 console.log('login failed');
                 resolve({status:false})
             }
+        })
+    },
+    addToCart:(proId,userId)=>{
+        return new Promise(async(resolve,reject)=>{
+            let userCart=await db.get().collection(collection.CART_COLLECTION).findOne({user:ObjectID(userId)})
+            if(userCart){
+                db.get().collection(collection.CART_COLLECTION)
+                .updateOne({user:objectId(userId)},
+                     {
+                         
+                             $push:{products:objectId(proId)}
+                         
+                     }
+                ).then((response)=>{
+                    resolve()
+                })
+            }else{
+                let cartObj={
+                    user:objectId(userId),
+                    products:[objectId(proId)]
+                }
+                db.get().collection(collection.CART_COLLECTION).insertOne(cartObj).then((response)=>{
+                    resolve()
+                })
+            }
+        })
+    },
+    getCartProducts:(userId)=>{
+        return new Promise(async(resolve,reject)=>{
+            let cartItems=await db.get().collection(collection.CART_COLLECTION).aggregate([
+            {
+                $match:{user:objectId(userId)}
+            },
+            {
+                $lookup:{
+                    from:collection.PRODUCT_COLLECTION,
+                    let:{prodList:'$products'},
+                    pipeline:[
+                        {
+                            $match:{
+                                $expr:{
+                                    $in:['$_id',"$$prodList"]
+                                }
+                            }
+                        }
+                    ],
+                    as:'cartItems'
+                }
+            }    
+            ]).toArray()
+            resolve(cartItems[0].cartItems)
         })
     }
 }
