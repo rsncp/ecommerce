@@ -1,8 +1,7 @@
 var db=require('../confg/connection')
 var collection=require('../confg/collections')
 const bcrypt=require('bcrypt')  
-const { ObjectID } = require('mongodb')
-const { response } = require('express')
+
 var objectId=require('mongodb').ObjectID
 
 module.exports={
@@ -122,7 +121,7 @@ module.exports={
     },
     getCartCount:(userId)=>{
         return new Promise(async(resolve,reject)=>{
-            let count=0
+            let count=0;
         let cart=await db.get().collection(collection.CART_COLLECTION).findOne({user:objectId(userId)})
         if(cart){
             count=cart.products.length
@@ -130,16 +129,19 @@ module.exports={
         resolve(count)
         })
     },
-    changeProductQuantity:({details})=>{
+    changeProductQuantity:(details)=>{
+        console.log("tring this thing");
         details.count=parseInt(details.count)
-        
+
+        console.log(details);
         return new Promise((resolve,reject)=>{
             db.get().collection(collection.CART_COLLECTION)
-            .updateOne({ _id:objectId(details.cartId), 'products.item':objectId(details.product)},
+            .updateOne({ _id:objectId(details.cart), 'products.item':objectId(details.product)},
             {
                 $inc:{'products.$.quantity':details.count}
             }
-          ).then(()=>{
+          ).then((response)=>{
+              console.log(response);
             resolve()
         })
         })

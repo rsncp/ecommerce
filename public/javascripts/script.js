@@ -1,16 +1,16 @@
-const { response } = require("express")
+
 
 function addToCart(proId){
     $.ajax({
       url:'/add-to-cart/'+proId,
       method:'get',
-      success:(Response)=>{
+      success:(response)=>{
           if(response.status){
-              let count=$('#cart-count').hrml()
+              let count=$('#cart-count').html()
               count=parseInt(count)+1
               $("#cart-count").html(count)
           }
-        alert(Response)
+        alert(response)
       }
     })
   }
