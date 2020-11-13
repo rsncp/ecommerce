@@ -87,7 +87,7 @@ router.get('/add-to-cart/:id',(req,res)=>{
 
 router.post('/change-product-quantity',(req,res)=>{
   
-  console.log(req.body,"just checking");
+  console.log(req.body);
   userHelpers.changeProductQuantity(req.body).then(()=>{
 
   })

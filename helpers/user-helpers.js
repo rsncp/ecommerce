@@ -1,7 +1,8 @@
 var db=require('../confg/connection')
 var collection=require('../confg/collections')
 const bcrypt=require('bcrypt')  
-
+const { ObjectID } = require('mongodb')
+const { response } = require('express')
 var objectId=require('mongodb').ObjectID
 
 module.exports={
@@ -21,21 +22,24 @@ module.exports={
         return new Promise(async(resolve,reject)=>{
             let loginStatus=false
             let response={}
-            let user=await db.get().collection(collection.USER_COLLECTION).findOne({Email:userData.Email})
+            let user=await db.get().collection(collection.USER_COLLECTION).findOne({email:userData.email})
             if(user){
+                console.log(user.Password,"user.password")
+                console.log(userData.Password,"userdata.password")
                 bcrypt.compare(userData.Password,user.Password).then((status)=>{
+                    console.log(status)
                     if(status){
                         console.log("login success");
                         response.user=user
                         response.status=true
                         resolve(response)
                     }else{
-                        console.log('login failed');
+                        console.log('login failed incorrectpassword');
                         resolve({status:false})
                     }
                 })
             }else{
-                console.log('login failed');
+                console.log('login failed user not found');
                 resolve({status:false})
             }
         })
@@ -128,7 +132,7 @@ module.exports={
         }
         resolve(count)
         })
-    },
+    }, 
     changeProductQuantity:(details)=>{
         console.log("tring this thing");
         details.count=parseInt(details.count)
